@@ -25,7 +25,7 @@ SPARK:
 #  ;domain = generalv3    Pro版本
 #  ;domain = lite         Lite版本址
 deepseek:
-  api_key:
+  api_key: 
   model: deepseek-chat
 #  ;model = deepseek-reasoner
 #  ;api充值地址(https://www.deepseek.com)
