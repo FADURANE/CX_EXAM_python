@@ -10,13 +10,14 @@ from tkinter import messagebox
 import _thread as thread
 import time
 from pynput.keyboard import Controller
-from config_manager import load_config
+from config_manager import load_config_if_exists, save_deepseek_config
 from file_manager import load_tiku_file
 from ai_spark import Ws_Param, on_error, on_close, on_open, run, on_message
 from ai_deepseek import call_deepseek_api
 from utils import set_window_on_top, change_opacity, change_opacity0, close_window, change_weight
 from ui_main import create_main_ui, highlight_search, next_search_result
 from ui_ai import create_ai_ui
+from ui_settings import create_settings_ui, create_settings_embedded
 import ssl
 import websocket
 import functools
@@ -27,6 +28,8 @@ text_size = 10         # 字体大小
 is_small = False       # 窗口大小状态
 x = 0                  # 拖动窗口时的x坐标
 y = 0                  # 拖动窗口时的y坐标
+deepseek_api_key = ''  # Deepseek API Key（运行时可热切换）
+deepseek_model = 'deepseek-chat'  # Deepseek 模型（运行时可热切换）
 
 # 事件处理函数
 
@@ -80,7 +83,12 @@ def on_ai_button():
 
 def on_back():
     """切换回主界面"""
-    ai_ui['ai_frame'].pack_forget()
+    # 隐藏AI或设置界面
+    if ai_ui['ai_frame'].winfo_ismapped():
+        ai_ui['ai_frame'].pack_forget()
+    if 'settings_ui' in globals() and settings_ui['settings_frame'].winfo_ismapped():
+        settings_ui['settings_frame'].pack_forget()
+    # 显示主界面
     main_ui['search_frame'].pack(side="top", fill="x")
     main_ui['main_frame'].pack(fill="both", expand=True)
 
@@ -104,10 +112,12 @@ def on_input(entry):
 def on_ai_search():
     """AI界面AI搜索，支持讯飞星火和Deepseek"""
     ai_ui['ai_search_button'].config(state='disabled')
-    ai_ui['ai_text_box'].config(state='normal')
-    ai_ui['ai_text_box'].delete('1.0', tk.END)
-    ai_ui['ai_text_box'].insert(tk.END, "正在思考中，请稍候...")
-    ai_ui['ai_text_box'].config(state='disabled')
+    # 仅在Deepseek时展示占位提示；讯飞星火不显示
+    if type == 2:
+        ai_ui['ai_text_box'].config(state='normal')
+        ai_ui['ai_text_box'].delete('1.0', tk.END)
+        ai_ui['ai_text_box'].insert(tk.END, "正在思考中，请稍候...")
+        ai_ui['ai_text_box'].config(state='disabled')
     def update_ai_text(content):
         ai_ui['ai_text_box'].config(state='normal')
         ai_ui['ai_text_box'].delete('1.0', tk.END)  # 回答前先清空
@@ -152,31 +162,26 @@ def on_ai_input(entry):
         entry.delete(0, 'end')
     thread.start_new_thread(input_thread, ())
 
-# 加载配置
-try:
-    config = load_config()
-except Exception as e:
-    messagebox.showinfo("提示", str(e))
-    exit()
+# 加载配置（若无则使用写死的讯飞星火默认配置，不创建文件）
+config = load_config_if_exists()
 
-type = config['AI_set']['type']
-if type == 0:
-    messagebox.showinfo("AI设置", "当前未设置AI")
-elif type == 1:
-    messagebox.showinfo("AI设置", "正在使用SparkAI")
-    spark_config = config['SPARK']
-    appid = spark_config['appid']
-    api_secret = spark_config['api_secret']
-    api_key = spark_config['api_key']
-    Spark_url = spark_config['Spark_url']
-    domain = spark_config['domain']
-elif type == 2:
-    messagebox.showinfo("AI设置", "正在使用DeepseekAI")
-    deepseek_config = config['deepseek']
-    deepseek_api_key = deepseek_config['api_key']
-    deepseek_model = deepseek_config['model']
+# 启动验证与版本检测已移除，直接进入主程序
+
+deepseek_config = (config or {}).get('deepseek', {})
+deepseek_api_key = deepseek_config.get('api_key', deepseek_api_key)
+deepseek_model = deepseek_config.get('model', deepseek_model)
+
+if deepseek_api_key:
+    # 使用Deepseek
+    type = 2
 else:
-    messagebox.showinfo("AI设置", "请检查config.yaml文件中的AI_set配置项")
+    # 使用写死的讯飞星火
+    type = 1
+    appid = "1b69309b"
+    api_secret = "YWY0MWJhNTM4MGU3NTJkZDJiMDM0ZjZl"
+    api_key = "5b2302f3ac2295e56bd13f587d7ffa6e"
+    Spark_url = "wss://spark-api.xf-yun.com/v1.1/chat"
+    domain = "lite"
 
 # 初始化主窗口和界面
 root = tk.Tk()
@@ -185,8 +190,50 @@ root.attributes("-alpha", current_opacity)
 root.configure(bg='white')
 root.overrideredirect(True)
 
-# 创建主界面和AI界面
-main_ui = create_main_ui(root, on_ai_button, on_search, on_input, text_size)
+def open_settings():
+    def on_save(api_key_value, model_value):
+        try:
+            if not api_key_value.strip():
+                return
+            save_deepseek_config(api_key_value.strip(), (model_value or 'deepseek-chat').strip())
+            # 热切换到Deepseek
+            global type, deepseek_api_key, deepseek_model
+            deepseek_api_key = api_key_value.strip()
+            deepseek_model = (model_value or 'deepseek-chat').strip()
+            type = 2
+        except Exception:
+            return
+    global settings_ui
+    # 如果尚未创建，先创建嵌入式设置界面
+    if 'settings_ui' not in globals():
+        settings_ui = create_settings_embedded(
+            root,
+            on_save,
+            on_back,
+            text_size,
+            default_api_key=deepseek_api_key,
+            default_model=deepseek_model
+        )
+    else:
+        # 已创建则更新默认显示（覆盖原值）
+        try:
+            settings_ui['api_entry'].delete(0, tk.END)
+            if deepseek_api_key:
+                settings_ui['api_entry'].insert(0, deepseek_api_key)
+            settings_ui['model_entry'].set(deepseek_model)
+        except Exception:
+            pass
+    # 切换显示
+    if main_ui['search_frame'].winfo_ismapped():
+        main_ui['search_frame'].pack_forget()
+    if main_ui['main_frame'].winfo_ismapped():
+        main_ui['main_frame'].pack_forget()
+    if ai_ui['ai_frame'].winfo_ismapped():
+        ai_ui['ai_frame'].pack_forget()
+    settings_ui['settings_frame'].pack(fill="both", expand=True)
+
+# 创建主界面、AI界面与（懒加载）设置界面
+main_ui = create_main_ui(root, on_ai_button, on_search, on_input, text_size, on_settings=open_settings)
 ai_ui = create_ai_ui(root, on_back, on_ai_search, on_ai_input, text_size)
 ai_ui['ai_frame'].pack_forget()
 
@@ -204,4 +251,4 @@ root.bind("<Escape>", lambda e: close_window(e, root))
 root.bind("<Return>", lambda e: next_search_result(main_ui['text_box']))
 
 # 启动主循环
-root.mainloop() 
+root.mainloop()

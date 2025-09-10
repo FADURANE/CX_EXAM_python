@@ -55,7 +55,7 @@ def next_search_result(text_box):
     text_box.tag_add('current_highlight', start, end)
     text_box.see(start)
 
-def create_main_ui(root, on_ai_button, on_search, on_input, text_size=10):
+def create_main_ui(root, on_ai_button, on_search, on_input, text_size=10, on_settings=None):
     """
     创建主界面控件并布局，返回控件引用字典。
     :param root: Tk主窗口
@@ -71,6 +71,10 @@ def create_main_ui(root, on_ai_button, on_search, on_input, text_size=10):
     search_entry = tk.Entry(search_frame)
     search_entry.pack(side="left", fill="x", expand=True, padx=5, pady=5)
     search_entry.configure(foreground='gray')
+    if on_settings is not None:
+        settings_button = tk.Button(search_frame, text="设置", command=on_settings)
+        settings_button.pack(side="right", padx=5, pady=5)
+        settings_button.configure(foreground='gray')
     ai_button = tk.Button(search_frame, text="AI", command=on_ai_button)
     ai_button.pack(side="right", padx=5, pady=5)
     ai_button.configure(foreground='gray')
@@ -95,7 +99,7 @@ def create_main_ui(root, on_ai_button, on_search, on_input, text_size=10):
     submit_button = tk.Button(bottom_frame, text="输入", command=lambda: on_input(input_entry))
     submit_button.pack(side="right", padx=5, pady=5)
     submit_button.configure(foreground='gray')
-    return {
+    ui = {
         'search_frame': search_frame,
         'search_entry': search_entry,
         'ai_button': ai_button,
@@ -104,4 +108,7 @@ def create_main_ui(root, on_ai_button, on_search, on_input, text_size=10):
         'text_box': text_box,
         'input_entry': input_entry,
         'submit_button': submit_button
-    } 
+    }
+    if on_settings is not None:
+        ui['settings_button'] = settings_button
+    return ui

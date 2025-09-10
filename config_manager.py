@@ -10,19 +10,30 @@ import yaml
 from tkinter import messagebox
 
 class FileNotFoundError(Exception):
-    """自定义异常：配置文件未找到"""
+    """自定义异常：配置文件未找到（保留但不再强制触发）"""
     pass
 
-def check_config_file():
-    """检查当前目录下是否存在config.yaml文件"""
+def config_file_exists():
+    """返回当前目录下是否存在config.yaml文件"""
     config_name = "config.yaml"
     current_dir = os.getcwd()
-    if config_name not in os.listdir(current_dir):
-        raise FileNotFoundError("缺少config.yaml文件，请检查")
+    return config_name in os.listdir(current_dir)
 
-def load_config():
-    """加载config.yaml配置文件并返回配置字典"""
-    check_config_file()
+def load_config_if_exists():
+    """若存在config.yaml则加载返回配置字典，否则返回None"""
+    if not config_file_exists():
+        return None
     with open('config.yaml', 'r', encoding='utf-8') as f:
-        config = yaml.safe_load(f)
-    return config 
+        config = yaml.safe_load(f) or {}
+    return config
+
+def save_deepseek_config(api_key, model):
+    """仅保存Deepseek相关配置到config.yaml，不包含讯飞星火或选择项"""
+    data = {
+        'deepseek': {
+            'api_key': api_key,
+            'model': model
+        }
+    }
+    with open('config.yaml', 'w', encoding='utf-8') as f:
+        yaml.safe_dump(data, f, allow_unicode=True, sort_keys=False)

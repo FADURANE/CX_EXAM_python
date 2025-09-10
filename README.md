@@ -48,7 +48,7 @@
 - **题库内容只读保护**：防止误操作修改题库内容。
 
 ### AI 智能搜题
-- **多AI平台支持**：可选[讯飞星火](https://aiui.xfyun.cn/console)或[Deepseek](https://www.deepseek.com)。
+- **多AI平台支持（免重启热切换）**：默认使用写死在代码中的[讯飞星火](https://aiui.xfyun.cn/console)配置；当存在`config.yaml`且配置了 `deepseek.api_key` 时自动使用 [Deepseek](https://www.deepseek.com)；在设置页保存 Deepseek 配置后可立即生效，无需重启。
 - **一键AI问答**：输入问题后，AI自动返回答案，支持多线程防止界面卡顿。
 - **AI答案一键输入**：AI答案可一键自动输入到目标输入框（需英文输入法）。
 
@@ -62,7 +62,7 @@
 
 ### 其他实用功能
 - **多线程处理**：AI问答、输入等操作均采用多线程，保证界面流畅不卡顿。
-- **详细注释与易用配置**：所有代码文件均有详细头部说明和函数注释，`config.yaml`配置简单明了，便于二次开发。
+- **详细注释与易用配置**：所有代码文件均有详细头部说明和函数注释；`config.yaml`仅存放 Deepseek 配置，简单明了，便于二次开发。
 
 ---
 
@@ -78,8 +78,9 @@
 ├── ai_deepseek.py     # DeepseekAI HTTP API调用，AI问答请求与异常处理
 ├── ui_main.py         # 主界面控件的创建、布局、搜索高亮、输入等事件处理
 ├── ui_ai.py           # AI界面控件的创建、布局、AI搜索与输入事件处理
+├── ui_settings.py     # 设置界面（嵌入式）Deepseek 配置读写与保存
 ├── utils.py           # 通用窗口操作工具函数，如置顶、透明度调整、窗口拖动、关闭等
-├── config.yaml        # 配置文件，填写AI平台参数
+├── config.yaml        # 配置文件，仅包含 Deepseek 配置（可选）
 ├── tiku.txt           # 本地题库文件
 └── README.md          # 项目说明文档
 ```
@@ -96,20 +97,18 @@
    ```
 3. **准备文件**：在程序运行目录下创建`tiku.txt`（题库）和`config.yaml`（配置文件）。
 
-### 配置AI平台
-1. **讯飞星火**：
-   - 在`config.yaml`中填写`appid`、`api_key`、`api_secret`。
-   - 申请地址：[讯飞星火](https://aiui.xfyun.cn/console)。
-2. **Deepseek**：
-   - 在`config.yaml`中填写`api_key`和`model`。
-   - 可直接使用预设，建议更换为自己的密钥。
+### 配置与切换
+- 程序默认使用讯飞星火配置，无需也不会写入到`config.yaml`。
+- 如需使用 Deepseek，请在主界面的“设置”中填写并保存：
+  - `api_key`: 你的 Deepseek API Key
+  - `model`: 仅支持 `deepseek-chat` 或 `deepseek-reasoner`
+- 保存后立即生效，无需重启；`config.yaml`仅包含 `deepseek` 字段。
 
 ### 启动程序
 1. **运行程序**：在命令行中运行`python main.py`。
-2. **首次启动**：程序会自动检测配置和题库文件。
-3. **主界面功能**：
+2. **主界面功能**：
    - 题库搜索：输入关键词，回车跳转下一个结果。
-   - AI切换：点击"AI"按钮切换到AI搜题界面。
+   - 设置/AI：顶部右侧“设置”按钮与“AI”按钮（已对调位置）。
    - 快捷输入：在输入框中输入内容，点击"输入"按钮自动输入。
 
 ### 常用快捷键与操作
@@ -156,8 +155,9 @@
 | 2025.2.13  | 添加Deepseek AI                                |
 | 2025.2.25  | 添加前置文件查找、详细注释                                |
 | 2025.2.27  | 多线程处理防止堵塞                                    |
-| 2025.4.22  | 在线更新、查找下一个功能                                 |
+| 2025.4.22  | 查找下一个功能                                          |
 | 2025.7.9   | 终于把屎山重构了，更加便于修改                              |
+| 2025.9.10  | 更新架构                            |
 ---
 
 ## 赞赏
@@ -180,10 +180,12 @@
 ---
 
 ## 配置说明
-- `config.yaml`文件：
-  - `type=0` 未设置AI
-  - `type=1` 讯飞星火AI
-  - `type=2` DeepseekAI
+`config.yaml`（可选，仅用于 Deepseek，无需单独设置）：
+```yaml
+deepseek:
+  api_key: "YOUR_DEEPSEEK_API_KEY"
+  model: "deepseek-chat"  # 或 deepseek-reasoner
+```
 
 ---
 
