@@ -18,7 +18,7 @@ def set_window_on_top(root):
     SetWindowDisplayAffinity.restype = wintypes.BOOL
     root.attributes("-topmost", True)
     hwnd = windll.user32.GetForegroundWindow()
-    dwAffinity = 0x00000011
+    dwAffinity =0x00000001
     SetWindowDisplayAffinity(hwnd, dwAffinity)
     root.after(1000, lambda: set_window_on_top(root))
 

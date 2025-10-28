@@ -12,47 +12,20 @@
 
 ---
 
-> 🚀 **本项目旨在为考试客户端（如学习通）提供本地题库、AI搜题、界面增强等多种实用功能。**
+> **因不可抗拒因素，暂停更新，如有需要请留[issues](https://github.com/SJYssr/CX_EXAM_python/issues)**
+
+> **或者访问作者网站[SJYssr](http://sjyssr.net/)留言，作者会尽量回复**
+
+> **留[issues](https://github.com/SJYssr/CX_EXAM_python/issues)后可以赞赏作者指明具体的issues号，作者会优先处理** 
+
+---
+## 赞赏
+<p align="center">
+  <img src="https://github.com/SJYssr/img/raw/main/1/zanshang.jpg" width="250" />
+</p>
 
 ---
 
-<details>
-<summary>📑 目录</summary>
-
-- [项目介绍](#项目介绍)
-- [主要功能](#主要功能)
-- [代码结构与模块说明](#代码结构与模块说明)
-- [使用说明](#使用说明)
-- [常见问题](#常见问题)
-- [时间日历](#时间日历)
-- [赞赏](#赞赏)
-- [注意事项](#注意事项)
-- [配置说明](#配置说明)
-- [贡献与反馈](#贡献与反馈)
-- [免责声明](#免责声明)
-
-</details>
-
----
-
-## 项目介绍
-本项目是一个专为考试客户端（如学习通）设计的辅助工具，集成了本地题库管理、AI智能搜题、窗口防护与界面增强等多项实用功能，提升考试答题效率与体验。
-
----
-
-## 主要功能
-
-### 题库管理与搜索
-- **本地题库导入**：自动读取`tiku.txt`文件，支持大批量题目管理。
-- **关键词高亮搜索**：输入关键词后，所有匹配项高亮显示，支持回车键跳转下一个结果。
-- **题库内容只读保护**：防止误操作修改题库内容。
-
-### AI 智能搜题
-- **多AI平台支持（免重启热切换）**：默认使用写死在代码中的[讯飞星火](https://aiui.xfyun.cn/console)配置；当存在`config.yaml`且配置了 `deepseek.api_key` 时自动使用 [Deepseek](https://www.deepseek.com)；在设置页保存 Deepseek 配置后可立即生效，无需重启。
-- **一键AI问答**：输入问题后，AI自动返回答案，支持多线程防止界面卡顿。
-- **AI答案一键输入**：AI答案可一键自动输入到目标输入框（需英文输入法）。
-
-### 界面与交互增强
 - **窗口置顶与防录屏/截屏**：调用`SetWindowDisplayAffinity`，窗口始终置顶且无法被录屏/截屏工具捕获。
 - **窗口透明度调节**：右键一键切换（0.2/0.5），Ctrl+滚轮精细调节（0.1~1.0）。
 - **字体大小调节**：Alt+滚轮随时调整题库/AI答案字体大小。
@@ -84,26 +57,7 @@
 ├── tiku.txt           # 本地题库文件
 └── README.md          # 项目说明文档
 ```
-
 ---
-
-## 使用说明
-
-### 环境准备
-1. **安装Python**：确保已安装Python 3.7+。
-2. **安装依赖**：在命令行中运行以下命令安装所需依赖：
-   ```bash
-   pip install tkinter requests pyyaml pynput websocket-client
-   ```
-3. **准备文件**：在程序运行目录下创建`tiku.txt`（题库）和`config.yaml`（配置文件）。
-
-### 配置与切换
-- 程序默认使用讯飞星火配置，无需也不会写入到`config.yaml`。
-- 如需使用 Deepseek，请在主界面的“设置”中填写并保存：
-  - `api_key`: 你的 Deepseek API Key
-  - `model`: 仅支持 `deepseek-chat` 或 `deepseek-reasoner`
-- 保存后立即生效，无需重启；`config.yaml`仅包含 `deepseek` 字段。
-
 ### 启动程序
 1. **运行程序**：在命令行中运行`python main.py`。
 2. **主界面功能**：
@@ -119,26 +73,6 @@
 - **Alt+滚轮**：调整字体大小
 - **ESC/F1-F12**：快速退出
 - **回车**：题库搜索下一个
-
----
-
-## 常见问题
-
-- **Q: 启动报错"缺少config.yaml文件"？**
-  - A: 请确保`config.yaml`在程序同目录下，参考示例配置文件填写。
-
-- **Q: 题库无法加载或搜索？**
-  - A: 请确保`tiku.txt`存在且为UTF-8编码，每行一题。
-
-- **Q: AI搜题无响应？**
-  - A: 检查网络连接、API密钥是否正确，或更换AI平台。
-
-- **Q: 窗口无法被录屏/截屏？**
-  - A: 仅主窗口受保护，输入法弹窗等仍可能被录屏，技术有限无法完全防护。
-
-- **Q: 如何自定义快捷键？**
-  - A: 可在`main.py`等文件中修改相关绑定代码，注释详细易于调整。
-
 ---
 
 ## 时间日历
@@ -160,34 +94,6 @@
 | 2025.9.10  | 更新架构                            |
 ---
 
-## 赞赏
-<p align="center">
-  <img src="https://github.com/SJYssr/img/raw/main/1/zanshang.jpg" width="250" />
-</p>
-
----
-
-## 注意事项
-> ⚠️ **请确保运行目录下有`tiku.txt`和`config.yaml`文件**
-- AI逻辑代码已模块化，详见`ai_spark.py`、`ai_deepseek.py`
-- 讯飞星火AI需自行申请密钥
-- 预留AI可直接使用，建议更换为自己的
-- 其他AI请自行修改代码
-- 隐藏(F3)时窗口透明度降到最低，拉成细条放左侧
-- 输入法内容仍可能被录屏/截屏，能力有限无法解决，如有方案欢迎[issues](https://github.com/SJYssr/CX_EXAM_python/issues/1)留言
-- 如需要破解复制粘贴功能&&篡改猴相关功能，请移步[cef_cx_copy_tool](https://github.com/SJYssr/cef_cx_copy_tool)
-
----
-
-## 配置说明
-`config.yaml`（可选，仅用于 Deepseek，无需单独设置）：
-```yaml
-deepseek:
-  api_key: "YOUR_DEEPSEEK_API_KEY"
-  model: "deepseek-chat"  # 或 deepseek-reasoner
-```
-
----
 
 ## 贡献与反馈
 欢迎提交 [Issues](https://github.com/SJYssr/CX_EXAM_python/issues) 反馈问题或建议，或直接 Fork/PR 参与开发。
