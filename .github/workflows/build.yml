@@ -24,7 +24,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install requests websocket-client pynput pyinstaller
+        pip install requests websocket-client pynput pyyaml pyinstaller
 
     - name: Build EXE with PyInstaller
       run: |
